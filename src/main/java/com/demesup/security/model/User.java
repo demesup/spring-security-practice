@@ -1,4 +1,4 @@
-package com.demesup.security.user;
+package com.demesup.security.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,22 +22,21 @@ public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
   @SequenceGenerator(name = "seq", sequenceName = "user_seq", allocationSize = 1)
-  Integer id;
-  String firstname;
-  String lastname;
-  String email;
+  Long id;
+  String name;
+  String username;
   String password;
-  @Enumerated(EnumType.STRING)
-  Role role;
+  @ManyToMany(fetch = FetchType.EAGER)
+  Collection<Role> roles = new ArrayList<>();
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority(role.name()));
+    return List.of(new SimpleGrantedAuthority(roles.toString()));
   }
 
   @Override
   public String getUsername() {
-    return email;
+    return username;
   }
 
   @Override
@@ -57,5 +57,10 @@ public class User implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public User addRole(Role role) {
+    this.roles.add(role);
+    return this;
   }
 }
