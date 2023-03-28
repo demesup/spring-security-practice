@@ -10,6 +10,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +22,7 @@ import java.util.Optional;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class ServiceImpl implements Service {
+public class ServiceImpl implements Service , UserDetailsService {
   UserRepository userRepository;
   RoleRepository roleRepository;
 
@@ -54,5 +57,11 @@ public class ServiceImpl implements Service {
   public List<User> getUsers() {
     log.info("Fetching all users");
     return userRepository.findAll();
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    return userRepository.findByUsername(username)
+        .orElseThrow(()-> new NotFoundException(User.class, username));
   }
 }
